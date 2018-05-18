@@ -1,5 +1,5 @@
+-- para usar o sort
 import Data.List
-import Data.Ord
 
 -- tipo Point tem o nome do vertice e sua lista de coordenadas
 data Point = Point String [Float]
