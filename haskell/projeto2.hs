@@ -30,9 +30,6 @@ convert line = do
 drop' :: Int -> [a] -> [a]
 drop' n xs = [v | (_,v) <- filter (\(x,_) -> x > n) $ zip [1..] xs]
 
--- dado uma lista de pontos (vertices), uma lista de arestas ordenada cresc, retorna a AGM (lista de arestas)
---kruskal :: [Vertex] -> [Edge] -> [Edge]
-
 -- ******************* MAIN *******************
 main = do 
     k <- getLine
