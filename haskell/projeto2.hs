@@ -1,3 +1,5 @@
+-- exemplo foi de Kruskal foi encontrado em http://echochamber.me/viewtopic.php?t=46361
+
 -- para usar o sort
 import Data.List
 import Prelude
