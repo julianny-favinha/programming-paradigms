@@ -25,10 +25,6 @@ convert line = do
       coords = map read (tail line)
     (Vertex nome coords)
 
--- remove os n primeiros elementos de uma lista
-drop' :: Int -> [a] -> [a]
-drop' n xs = [v | (_,v) <- filter (\(x,_) -> x > n) $ zip [1..] xs]
-
 -- 
 componentes :: [String] -> [[String]]
 componentes vertices = map (\x -> [x]) vertices
@@ -73,5 +69,5 @@ main = do
         w = map words l
         vertex = map convert w
         
-    --print $ drop' ((read k)-1) (reverse $ sort $ kruskal (sort $ createEdges $ vertex))
+    --print $ drop ((read k)-1) (reverse $ sort $ kruskal (sort $ createEdges $ vertex))
     print $ kruskal (sort $ createEdges $ vertex)
