@@ -124,3 +124,4 @@ main = do
         agm = drop ((read k)-1) (reverse (sort (kruskal (sort (createEdges vertex)))))
         
     imprimeLista $ (dfs (vertices (createEdges vertex)) agm [])
+    --print (sort (kruskal (sort (createEdges vertex))))
