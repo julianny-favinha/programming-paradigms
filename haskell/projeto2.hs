@@ -1,22 +1,11 @@
--- exemplo foi de Kruskal foi encontrado em http://echochamber.me/viewtopic.php?t=46361
-
--- para usar o sort
 import Data.List
 import Prelude
 
 -- tipo Vertex tem o nome do vertice e sua lista de coordenadas
-data Vertex = Vertex String [Float] deriving Show
+data Vertex = Vertex String [Float] deriving (Show)
 
 -- tipo Edge tem o nome dos dois vertices e a distancia entre eles
 data Edge = Edge Float String String deriving (Show, Ord, Eq)
-
--- cria lista de Edges a partir da distancia entre Vertex
-createEdges :: [Vertex] -> [Edge]
-createEdges listVertex = [distanceVertex (Vertex p1 coord1) (Vertex p2 coord2) | (Vertex p1 coord1) <- listVertex, (Vertex p2 coord2) <- listVertex, p1 < p2]
-
--- calcula distancia entre Vertex
-distanceVertex :: Vertex -> Vertex -> Edge
-distanceVertex (Vertex p1 coord1) (Vertex p2 coord2) = Edge (sqrt $ sum $ zipWith (\ f1 f2 -> (f1 - f2)**2) coord1 coord2) p1 p2
 
 -- converte uma linha do input em Vertex
 convert :: [String] -> Vertex
@@ -26,37 +15,18 @@ convert line = do
       coords = map read (tail line)
     (Vertex nome coords)
 
--- remove os n primeiros elementos de uma lista
-drop' :: Int -> [a] -> [a]
-drop' n xs = [v | (_,v) <- filter (\(x,_) -> x > n) $ zip [1..] xs]
+-- cria lista de Edges a partir da distancia entre Vertex
+createEdges :: [Vertex] -> [Edge]
+createEdges listVertex = [distanceVertex (Vertex p1 coord1) (Vertex p2 coord2) | (Vertex p1 coord1) <- listVertex, (Vertex p2 coord2) <- listVertex, p1 < p2]
 
-kruskal :: [Edge] -> [Edge]
-kruskal g = kruskalRec g [] [(x, x) | x <- (vertices g)]
+-- calcula distancia entre Vertex
+distanceVertex :: Vertex -> Vertex -> Edge
+distanceVertex (Vertex p1 coord1) (Vertex p2 coord2) = Edge (sqrt $ sum $ zipWith (\ f1 f2 -> (f1 - f2)**2) coord1 coord2) p1 p2
 
-kruskalRec :: [Edge] -> [Edge] -> [(String, String)] -> [Edge]
-kruskalRec [] progress sets = progress
-kruskalRec ((Edge d v1 v2) : es) progress sets
-    | joined v1 v2 sets = kruskalRec es progress sets
-    | otherwise = kruskalRec es ((Edge d v1 v2) : progress) (join v1 v2 sets)
-
-joined :: String -> String -> [(String, String)] -> Bool
-joined x y sets = (parent x sets) == (parent y sets)
-
-join :: String -> String -> [(String, String)] -> [(String, String)]
-join x y sets
-    | joined x y sets = sets
-    | otherwise = newY : rest
-    where
-        newY = (fst oldY, x)
-        oldY = head [(a, b) | (a, b) <- sets, a==(parent y sets)]
-        rest = [(a, b) | (a, b) <- sets, a /= (parent y sets)]
-
-parent :: String -> [(String, String)] -> String
-parent elem sets
-    | fst match == snd match = fst match
-    | otherwise = parent (snd match) sets
-    where
-        match = head [(x, y) | (x, y) <- sets, x == elem]
+-- encapsula cada elemento de uma lista dentro de uma lista
+-- exemplo: ["a", "b", "c"] retorna [["a"], ["b"], ["c"]]
+componentes :: [String] -> [[String]]
+componentes vertices = map (\x -> [x]) vertices
 
 -- retorna a lista de vertices
 vertices :: [Edge] -> [String]
@@ -72,10 +42,78 @@ verticesRec ((Edge _ v1 v2) : es) str = verticesRec es (first ++ second ++ str) 
         | not(elem v2 str) = [v2]
         | otherwise = []
 
--- ******************************************************* TODO *******************************************************
---procuraGrupos :: [Vertex] -> [Edge] -> [[Vertex]]
+-- encontra a lista que possui o elemento v
+--exemplo: encontraLista [["1","2"],["3","4"]] "5" retorna []
+--exemplo: encontraLista [["1","2"],["3","4"]] "4" retorna ["3","4"]
+encontraLista :: [[String]] -> String -> [String]
+encontraLista [] _ = []
+encontraLista (c : cs) v
+    | elem v c = c
+    | otherwise = encontraLista cs v
 
--- ******************* MAIN *******************
+-- dado um vertice e uma lista de arestas, encontra os vertices adjacentes desse vertice
+adjacents :: String -> [Edge] -> [String] -> [String]
+adjacents _ [] adj = adj
+adjacents v ((Edge _ v1 v2) : es) adj = adjacents v es (u ++ adj) where
+    u
+        | v == v1 = [v2]
+        | v == v2 = [v1]
+        | otherwise = []
+
+-- remove arestas onde possui v como um dos vertices
+removeEdges :: String -> [Edge] -> [Edge]
+removeEdges v edges = filter (\(Edge _ v1 v2) -> ((v2 /= v) && (v1 /= v))) edges 
+
+--exemplo: mergeListas "1" "3" [["1","2"],["3","4"], ["5"]] retorna [["1","2","3","4"], ["5"]]
+mergeListas :: String -> String -> [[String]] -> [[String]]
+mergeListas v1 v2 c = filter (/= (encontraLista c v2)) (filter (/= (encontraLista c v1)) ([(encontraLista c v1) ++ (encontraLista c v2)] ++ c))
+
+-- imprime lista de componentes de uma forma diferente da convencional
+{-
+exemplo: [["a","b"], ["c"]] imprime
+
+["a","b"]
+["c"]
+-}
+imprimeLista [] = return ()
+imprimeLista (x : xs) =
+  do
+    print x
+    imprimeLista xs
+
+{-
+Algoritmo de Kruskal
+-}
+kruskal :: [Edge] -> [Edge]
+kruskal arestas = kruskalAux (componentes $ vertices arestas) [] arestas
+
+kruskalAux :: [[String]] -> [Edge] -> [Edge] -> [Edge]
+kruskalAux _ agm [] = agm
+kruskalAux componentes agm (aresta@(Edge d v1 v2): es)
+    | not (elem v2 (encontraLista componentes v1)) = kruskalAux (mergeListas v1 v2 componentes) (aresta: agm) es
+    | otherwise = kruskalAux componentes agm es
+
+{-
+Algoritmo de Busca em profundidade
+-}
+-- recebe lista de nomes dos vertices, agm (com as k-1 arestas a menos) e recebe um acumulador (components)
+-- retorna lista de componentes conexas
+dfs :: [String] -> [Edge] -> [[String]] -> [[String]]
+dfs [] _ components = components
+dfs (v : vs) edges components
+    -- se v nao é elemento em components, vai chamar dfs-visit e o resultado vai ser appendado em components
+    | (encontraLista components v) == [] = dfs vs edges (components ++ [dfsVisit edges [] v])
+    | otherwise = dfs vs edges components
+
+-- dado o vertice e a agm, retorna o componente
+dfsVisit :: [Edge] -> [String] -> String -> [String]
+dfsVisit edges acc v
+    | (adjacents v edges []) == [] = v : acc
+    | otherwise = foldl (++) [] (map (dfsVisit (removeEdges v edges) (acc ++ [v])) (adjacents v edges []))
+
+{- 
+MAIN
+-}
 main = do 
     k <- getLine
     c <- getContents
@@ -83,6 +121,7 @@ main = do
         l = lines c 
         w = map words l
         vertex = map convert w
+        agm = drop ((read k)-1) (reverse (sort (kruskal (sort (createEdges vertex)))))
         
-    --print $ drop' ((read k)-1) (reverse $ sort $ kruskal (sort $ createEdges $ vertex))
-    print $ kruskal (sort $ createEdges $ vertex)
+    imprimeLista $ (dfs (vertices (createEdges vertex)) agm [])
+    --print (sort (kruskal (sort (createEdges vertex))))
