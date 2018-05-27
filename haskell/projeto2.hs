@@ -102,7 +102,7 @@ dfs :: [String] -> [Edge] -> [[String]] -> [[String]]
 dfs [] _ components = components
 dfs (v : vs) edges components
     -- se v nao é elemento em components, vai chamar dfs-visit e o resultado vai ser appendado em components
-    | (findList components v) == [] = dfs vs edges (components ++ [dfsVisit edges [] v])
+    | (findList components v) == [] = dfs vs edges (components ++ [nub (dfsVisit edges [] v)])
     | otherwise = dfs vs edges components
 
 -- dado o vertice e a agm, retorna o componente
@@ -125,3 +125,5 @@ main = do
         
     printList $ (dfs (vertices (createEdges vertex)) agm [])
     --print (sort (kruskal (sort (createEdges vertex))))
+
+    --print $ vertices (createEdges vertex)
