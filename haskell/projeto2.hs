@@ -68,6 +68,9 @@ removeEdges v edges = filter (\(Edge _ v1 v2) -> ((v2 /= v) && (v1 /= v))) edges
 mergeLists :: String -> String -> [[String]] -> [[String]]
 mergeLists v1 v2 c = filter (/= (findList c v2)) (filter (/= (findList c v1)) ([(findList c v1) ++ (findList c v2)] ++ c))
 
+sortComponents :: [[String]] -> [[String]]
+sortComponents components = map sort components
+
 -- imprime lista de componentes de uma forma diferente da convencional
 {-
 exemplo: [["a","b"], ["c"]] imprime
@@ -123,7 +126,4 @@ main = do
         vertex = map convert w
         agm = drop ((read k)-1) (reverse (sort (kruskal (sort (createEdges vertex)))))
         
-    printList $ (dfs (vertices (createEdges vertex)) agm [])
-    --print (sort (kruskal (sort (createEdges vertex))))
-
-    --print $ vertices (createEdges vertex)
+    printList $ sortComponents ((dfs (vertices (createEdges vertex)) agm []))
