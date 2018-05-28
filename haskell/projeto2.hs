@@ -68,6 +68,7 @@ removeEdges v edges = filter (\(Edge _ v1 v2) -> ((v2 /= v) && (v1 /= v))) edges
 mergeLists :: String -> String -> [[String]] -> [[String]]
 mergeLists v1 v2 c = filter (/= (findList c v2)) (filter (/= (findList c v1)) ([(findList c v1) ++ (findList c v2)] ++ c))
 
+-- ordena um componente lexicograficamente
 sortComponents :: [[String]] -> [[String]]
 sortComponents components = map sort components
 
