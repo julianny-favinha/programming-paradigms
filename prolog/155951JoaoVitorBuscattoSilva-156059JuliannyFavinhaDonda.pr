@@ -1,0 +1,46 @@
+tamanho(LISTA, TAM):- 
+tamanho(LISTA, TAM, 0).
+tamanho([], TAM, TAM).
+tamanho([_ | REST], TAM, TAMAUX) :- 
+	ACCX is TAMAUX + 1, 
+    tamanho(REST, TAM, ACCX).
+
+max(A, B, MAX) :-
+    (A > B -> MAX = A; MAX = B).
+
+min(A, B, MIN) :-
+    (A < B -> MIN = A; MIN = B).
+
+somaareas([], 0).
+somaareas([(_, _, AREA) | REST], SUMAREA) :-
+    somaareas(REST, SUMAREAAUX),
+    SUMAREA is SUMAREAAUX + AREA.
+
+topo :- input(IN), execute(IN, COUNT, SUM), output(COUNT, SUM).
+
+input(IN) :-
+	read(IN).
+
+execute(IN, COUNT, SUM) :-
+	findall((A, B, AREA), (member(A, IN), member(B, IN), intercept(A, B, AREA)), OUTFIND),
+	tamanho(OUTFIND, TAM),
+    COUNT = TAM,
+    somaareas(OUTFIND, SOMA),
+    SUM = SOMA.
+
+intercept(rect(A, X1a, Y1a, X2a, Y2a), rect(B, X1b, Y1b, X2b, Y2b), AREA) :-
+	A @< B ,
+	\+ (Y2b >= Y1a ; X1b >= X2a ; Y1b =< Y2a ; X2b =< X1a),
+    min(X2a, X2b, MINX), max(X1a, X1b, MAXX), 
+    X = abs(MAXX - MINX),
+    min(Y1a, Y1b, MINY), max(Y2a, Y2b, MAXY), 
+    Y = abs(MAXY - MINY),
+    AREA = X * Y.
+
+output(COUNT, SUM) :-
+	write('numero de interseccoes: '),
+	write(COUNT),
+    nl,
+	write('area total: '),
+	write(SUM),
+    nl.
