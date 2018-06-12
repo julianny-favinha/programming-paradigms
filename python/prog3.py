@@ -22,7 +22,7 @@ def encontraKey(dic, v):
 
 # retorna lista de predecessores invertida(i.e. path)
 def pred(predecessors, p, init):
-    if(p == init):
+    if (p == init):
         return []
     return pred(predecessors, predecessors[p], init) + [predecessors[p]]
 
@@ -45,15 +45,31 @@ def getMode(graph, edge, ind, keys):
 
         ki, kj = keys[i], keys[j]
 
-        if((ki,kj) == edge):
+        if ((ki,kj) == edge):
             return mode, j, time
+
+def sumTimes(edges, begin, end):
+    sum = 0
+    for index in range(begin, end):
+	    sum += edges[index][3]
+
+    return sum
+
+def edgeExists(edges, e1a, e2a):
+    for edge in edges:
+        e1b, e2b, mode, time = edge
+        if e1a == e1b and e2a == e2b:
+            return True
+
+    return False
 
 # função main
 if __name__ == "__main__":
-
     graph = {}
+    subGraph ={}
     newGraph = {}
     waitTimes = {}
+    vehicles = {}
 
     # Lê linhas do grafo
     while True:
@@ -63,6 +79,25 @@ if __name__ == "__main__":
         else:
             i, j, mode, time = line.split(" ")
             graph[(i,j, mode)] = float(time)
+            if mode in vehicles.keys():
+            	vehicles[mode].append((i, j, time))
+            else:
+            	vehicles[mode] = [(i, j, time)]
+
+    subGraph = graph
+    # Cria novas arestas dos grafo
+    for edges in vehicles.values():
+        value.sort(key=lambda tup: tup[0])
+
+    for edges in vehicles.values():
+        for i in range(0, len(edges)-1):
+            for j in range(i+1, len(edges)):
+                # nova aresta
+                if edges[i][0] != edges[j][1] and not edgeExists(subGraph, edges[i][0], edges[j][1]):
+                    subGraph[(edges[i][0], edges[j][1], edges[i][2])] = sumTimes(edges, i, j+1)
+
+    print("SUBGRAPH")
+    print(subGraph)
 
     # Lê linhas de tempo de espera
     while True:
@@ -90,7 +125,7 @@ if __name__ == "__main__":
         s, t, mode = key
         oc = countEdge(graph, (s,t))
 
-        if(oc > 1):
+        if (oc > 1):
             newGraph[(s, s + ' ' + t + ' ' + mode + "(new node)", key)] = 0.1 # não pode ser zero
             newGraph[(s + ' ' + t + ' ' + mode + "(new node)", t, key)] = time
         else:
