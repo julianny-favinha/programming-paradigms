@@ -48,12 +48,26 @@ def getMode(graph, edge, ind, keys):
         if ((ki,kj) == edge):
             return mode, j, time
 
+def transformGraphList(graph):
+	edges = []
+	for key in graph.keys():
+		i, j, mode = key
+		edges.append((i, j, mode, graph[key]))
+
+	return edges
+
 def sumTimes(edges, begin, end):
     sum = 0
     for index in range(begin, end):
 	    sum += edges[index][3]
 
     return sum
+
+def sumEdges(graph, begin, end):
+	edges = transformGraphList(graph)
+	edges.sort(key=lambda tup: tup[0])
+	return sumTimes(edges, begin, end)
+
 
 def edgeExists(edges, e1a, e2a):
     for edge in edges:
@@ -87,14 +101,14 @@ if __name__ == "__main__":
     subGraph = graph
     # Cria novas arestas dos grafo
     for edges in vehicles.values():
-        value.sort(key=lambda tup: tup[0])
+        edges.sort(key=lambda tup: tup[0])
 
     for edges in vehicles.values():
         for i in range(0, len(edges)-1):
             for j in range(i+1, len(edges)):
                 # nova aresta
                 if edges[i][0] != edges[j][1] and not edgeExists(subGraph, edges[i][0], edges[j][1]):
-                    subGraph[(edges[i][0], edges[j][1], edges[i][2])] = sumTimes(edges, i, j+1)
+                    subGraph[(edges[i][0], edges[j][1], edges[i][2])] = sumEdges(graph, i, j+1)
 
     print("SUBGRAPH")
     print(subGraph)
