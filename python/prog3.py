@@ -70,9 +70,15 @@ def createEdges(vertex, diagram):
 
 
 def realPath(start, end, diagram, mode):
+    """print("start {} end {} mode {}".format(start, end, mode))
+    print("diagram = {}".format(diagram))
+    print("diagram[{}] = {}".format(start, diagram[start]))"""
+
     if start not in diagram:
         return ''
-    if end in diagram[start]:
+
+    vertices = [i[0] for i in diagram[start]]
+    if end in vertices:
         return start + ' ' + mode + ' '
 
     for adjacent in diagram[start]:
@@ -127,7 +133,7 @@ if __name__ == "__main__":
         i, j, mode = key
 
         if mode != 'a-pe':
-            time += waitTimes[mode]
+            time += waitTimes[mode] / 2
 
         graph[key] = time
 
