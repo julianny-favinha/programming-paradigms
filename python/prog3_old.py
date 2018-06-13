@@ -1,7 +1,6 @@
 import numpy as np
 from scipy.sparse import csr_matrix
 from scipy.sparse.csgraph import dijkstra
-from collections import deque
 
 # verifica se há arestas multiplas no dicionario
 def countEdge(dic, key):
@@ -49,42 +48,12 @@ def getMode(graph, edge, ind, keys):
         if((ki,kj) == edge):
             return mode, j, time
 
-def createEdges(vertex, diagram):
-    visitado = []
-    fila = deque([])
-
-    fila.append(vertex)
-
-    sum = 0
-
-    while (len(fila) > 0):
-        v = fila.popleft()
-        if v in diagram:
-            for w in diagram[v]:
-                sum += w[1]
-                if w not in visitado:
-                    visitado.append((w[0], sum))
-                    fila.append(w[0])
-
-    return list(set(visitado) - set(diagram[vertex]))
-
-
-def realPath(start, end, diagram, mode):
-    if start not in diagram:
-        return ''
-    if end in diagram[start]:
-        return start + ' ' + mode + ' '
-
-    for adjacent in diagram[start]:
-        return start + ' ' + mode + ' ' + realPath(adjacent[0], end, diagram, mode)
-
-
 # função main
 if __name__ == "__main__":
+
     graph = {}
     newGraph = {}
     waitTimes = {}
-    graphByMode = {}
 
     # Lê linhas do grafo
     while True:
@@ -94,12 +63,8 @@ if __name__ == "__main__":
         else:
             i, j, mode, time = line.split(" ")
             graph[(i,j, mode)] = float(time)
-            if mode not in graphByMode:
-                graphByMode[mode] = {}  
-            if i in graphByMode[mode]:
-                graphByMode[mode][i].append((j, float(time)))
-            else:      
-                graphByMode[mode].update({i:[(j, float(time))]})
+
+			
 
     # Lê linhas de tempo de espera
     while True:
@@ -113,14 +78,7 @@ if __name__ == "__main__":
     # Lê linha de início-fim
     init, end = input().split(" ")
 
-    #del graphByMode['a-pe']
-    for mode, diagram in graphByMode.items():
-        if mode == 'a-pe':
-            continue
-        for vertex in diagram.keys():
-            adjacents = createEdges(vertex, diagram)
-            for adjacent in adjacents:
-                graph[(vertex, adjacent[0], mode)] = adjacent[1]
+
 
     # adiciona tempos de espera ao grafo
     for key, time in graph.items():
@@ -178,18 +136,15 @@ if __name__ == "__main__":
 
     # imprime path
     total = 0
-    first = init
-    pathAux = ''
-    end = ''
+    pathAux = init + ' '
     edgesAux = zip(path[:-1], path[1:])
     for edge in edgesAux:
-        mode, end, time = getMode(newGraph, edge, keys, dicIndex)
+        mode, t, time = getMode(newGraph, edge, keys, dicIndex)
 
         if mode != 'ignore':
-            pathAux += realPath(first, end, graphByMode[mode], mode)
-            first = end
+            pathAux += mode + ' ' + t + ' '
 
         total += time
 
-    print(pathAux + end)
-    print(total) 
+    print(pathAux)
+    print(total)
