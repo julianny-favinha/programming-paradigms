@@ -50,7 +50,7 @@ def getMode(graph, edge, ind, keys):
             return mode, j, time
 
 def createEdges(vertex, diagram):
-    visitado = []
+    visitados = []
     fila = deque([])
 
     fila.append(vertex)
@@ -59,14 +59,20 @@ def createEdges(vertex, diagram):
 
     while (len(fila) > 0):
         v = fila.popleft()
-        if v in diagram:
-            for w in diagram[v]:
-                sum += w[1]
-                if w not in visitado:
-                    visitado.append((w[0], sum))
-                    fila.append(w[0])
+        visitados.append((v, sum))
 
-    return list(set(visitado) - set(diagram[vertex]))
+        if v in diagram.keys():
+            adjacents = diagram[v]
+            for elem in adjacents:
+                w, wtime = elem
+
+                verticesVisitados = [i[0] for i in visitados]
+                if w not in verticesVisitados: 
+                    sum += wtime   
+                    visitados.append((w, sum))
+                    fila.append(w)
+
+    return list(set(visitados) - set(diagram[vertex]))
 
 
 def realPath(start, end, diagram, mode):
@@ -98,7 +104,7 @@ if __name__ == "__main__":
         if line == '':
             break
         else:
-            i, j, mode, time = line.split(" ")
+            i, j, mode, time = line.split()
             graph[(i,j, mode)] = float(time)
             if mode not in graphByMode:
                 graphByMode[mode] = {}  
@@ -113,16 +119,22 @@ if __name__ == "__main__":
         if line == '':
             break
         else:
-            mode, time = line.split(" ")
+            mode, time = line.split()
             waitTimes[mode] = float(time)
 
     # Lê linha de início-fim
-    init, end = input().split(" ")
+    init, end = input().split()
 
     #del graphByMode['a-pe']
+    #print("graphByMode -> {}".format(graphByMode))
     for mode, diagram in graphByMode.items():
         if mode == 'a-pe':
             continue
+
+        #print("diagram -> {}".format(diagram)) 
+
+        #print("diagram.keys() -> {}".format(diagram.keys()))
+
         for vertex in diagram.keys():
             adjacents = createEdges(vertex, diagram)
             for adjacent in adjacents:
@@ -194,8 +206,7 @@ if __name__ == "__main__":
         if mode != 'ignore':
             pathAux += realPath(first, end, graphByMode[mode], mode)
             first = end
-
-        total += time
+            total += time
 
     print(pathAux + end)
     print(total) 
