@@ -76,10 +76,6 @@ def createEdges(vertex, diagram):
 
 
 def realPath(start, end, diagram, mode):
-    """print("start {} end {} mode {}".format(start, end, mode))
-    print("diagram = {}".format(diagram))
-    print("diagram[{}] = {}".format(start, diagram[start]))"""
-
     if start not in diagram:
         return ''
 
@@ -125,15 +121,9 @@ if __name__ == "__main__":
     # Lê linha de início-fim
     init, end = input().split()
 
-    #del graphByMode['a-pe']
-    #print("graphByMode -> {}".format(graphByMode))
     for mode, diagram in graphByMode.items():
         if mode == 'a-pe':
             continue
-
-        #print("diagram -> {}".format(diagram)) 
-
-        #print("diagram.keys() -> {}".format(diagram.keys()))
 
         for vertex in diagram.keys():
             adjacents = createEdges(vertex, diagram)
